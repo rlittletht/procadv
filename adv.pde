@@ -124,7 +124,7 @@ void setup()
 void mouseClicked()
 {
   // figure out what control is selected and execute it...
-  String menuOption = g_story.StoryControls().MenuOptionFromLastMouseOver();
+  String menuOption = g_story.StoryControls().MenuIDFromLastMouseOver();
   
   if (menuOption != null)
     Move(menuOption);
