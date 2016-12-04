@@ -268,6 +268,7 @@ class Game
     }
     
     // and set the new node
+    m_fReenter = node.sMenuID.compareTo(choice.sNextNodeID) == 0;
     m_sCurrentNodeID = choice.sNextNodeID;
   }
   
