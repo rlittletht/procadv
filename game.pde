@@ -1,4 +1,4 @@
-import java.util.Map;
+import java.util.Map;  // needed to be able to access some of the lower level HashMap functionality
 
 // ================================================================================
 //  G A M E  N O D E  C H O I C E 
