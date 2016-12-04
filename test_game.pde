@@ -276,10 +276,10 @@ void Test_AdventureReader_IChoiceColumnCalculate()
   TestTrue(reader.m_dicsvNextNodeID == 11, "Test_AdventureReader_IChoiceColumnCalculate", "expected dicsv not set");
   
   
-  TestTrue(reader.IChoiceColumnCalculate(0, reader.m_dicsvNextNodeID) == 11 + 2, "Test_AdventureReader_IChoiceColumnCalculate", "last column first group unexpected value");
-  TestTrue(reader.IChoiceColumnCalculate(0, 0) == 0 + 2, "Test_AdventureReader_IChoiceColumnCalculate", "first column first group unexpected value");
-  TestTrue(reader.IChoiceColumnCalculate(1, reader.m_dicsvNextNodeID) == 23 + 2, "Test_AdventureReader_IChoiceColumnCalculate", "last column second group unexpected value");
-  TestTrue(reader.IChoiceColumnCalculate(1, 0) == 12 + 2, "Test_AdventureReader_IChoiceColumnCalculate", "last column second group unexpected value");
+  TestTrue(reader.IcsvChoiceCalculate(0, reader.m_dicsvNextNodeID) == 11 + 2, "Test_AdventureReader_IChoiceColumnCalculate", "last column first group unexpected value");
+  TestTrue(reader.IcsvChoiceCalculate(0, 0) == 0 + 2, "Test_AdventureReader_IChoiceColumnCalculate", "first column first group unexpected value");
+  TestTrue(reader.IcsvChoiceCalculate(1, reader.m_dicsvNextNodeID) == 23 + 2, "Test_AdventureReader_IChoiceColumnCalculate", "last column second group unexpected value");
+  TestTrue(reader.IcsvChoiceCalculate(1, 0) == 12 + 2, "Test_AdventureReader_IChoiceColumnCalculate", "last column second group unexpected value");
 }
   
 void GameTests()
