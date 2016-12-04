@@ -1,10 +1,25 @@
+
+// ================================================================================
+//  S T O R Y  W I N D O W 
+// 
+// The text window for the story. This will take care of rendering the story text,
+// keeping the story scrolled to the right place, clipping the story at the top
+// (as it grows downwards), and all the details of measuring the text, wrapping
+// lines (finding text breaking opportunities), etc.
+// 
+// The story knows about its bounding box as well as the text for the story.
+// ================================================================================
 class StoryWindow
 {
+  // the actual text of the story
   String[] m_story;
+
+  // bounding rectangle for the story text
   float m_x;  // left edge
   float m_y;  // top edge
   float m_dx;  // width
   float m_dy;  // height
+
   // ================================================================================
   //  S U B S T R I N G  M E A S U R E 
   // ================================================================================
@@ -16,6 +31,10 @@ class StoryWindow
   
   // ================================================================================
   //  L I N E  B R E A K  I N F O 
+  // 
+  // This remembers a bunch of information about a given line (measuring parts of the
+  // line) as well as the eventual breaking info (how many characters fit on this line
+  // starting at ichSegment start).  dyp is the height of the line.
   // ================================================================================
   class LineBreakInfo
   {
@@ -47,22 +66,33 @@ class StoryWindow
   
   StoryWindow()
   {
-  } //<>// //<>//
+  }
 
+  /* R E S E T  W I N D O W  D I M E N S I O N S */
+  /*----------------------------------------------------------------------------
+  	%%Function: ResetWindowDimensions
+  	%%Qualified: StoryWindow.ResetWindowDimensions
+   
+    reset our internal notion of the bounding box
+   
+    since we don't cache line break/display results right now, so we don't have
+    to worry about invalidating anything here
+  ----------------------------------------------------------------------------*/
   void ResetWindowDimensions(float x, float y, float dx, float dy)
   {
-    // we don't cache line break/display results right now, so we don't have to worry about invalidating anything
-    // here
     m_x = x;
     m_y = y;
     m_dx = dx;
     m_dy = dy;
   }
+
   /* A D D  T O  S T O R Y */
   /*----------------------------------------------------------------------------
     %%Function: AddToStory
     %%Qualified: StoryWindow.AddToStory
-    
+   
+    add the given string to our story. This also takes care of translating
+    "^" in the input text into a newline
   ----------------------------------------------------------------------------*/
   void AddToStory(String str)
   {
@@ -182,6 +212,18 @@ class StoryWindow
     return lineInfo;
   }
   
+  // ================================================================================
+  //  D I S P L A Y  L I N E 
+  // 
+  // A display line remembers the lineBreakInfo for the line as well as the bounding
+  // box that will be used to display the line. iStoryLine tells us which line
+  // in the overall story this displayline comes from. 
+  // 
+  // (NOTE: a single "line" in the story will often not fit on a single displayed
+  // line in the StoryWindow, so we will have 1 or more DisplayLines for a single
+  // line in the story. That's why we have iStoryLine, but ichSegmentStart is stored
+  // in the LineBreakInfo)
+  // ================================================================================
   class DisplayLine
   {
     float x;
@@ -194,9 +236,19 @@ class StoryWindow
   }
   
   // need to figure out how much of the story will fit within the "story window"
+  /* D R A W  S T O R Y */
+  /*----------------------------------------------------------------------------
+  	%%Function: DrawStory
+  	%%Qualified: StoryWindow.DrawStory
+   
+    Actually draw the story. This will break the story up into a set of
+    DisplayLines, and then we draw those DisplayLines into the window.
+   
+    FUTURE: This should really be broken into more parts, but hey, the actual
+    Display code in Word isn't broken up...so...there ya go...
+  ----------------------------------------------------------------------------*/
   void DrawStory()
   {
-//    println("================ TOP OF DRAWSTORY");
     fill(255);
     rect(m_x, m_y, m_dx, m_dy);
     fill(0);
