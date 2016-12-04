@@ -1,7 +1,38 @@
 import java.util.Map;  // needed to be able to access some of the lower level HashMap functionality
 
+// This module implements the actual game
+
+
 // ================================================================================
 //  G A M E  N O D E  C H O I C E 
+// 
+// Every game node has a set of choices that the user can take.
+// 
+// Each choice has:
+//   reqs
+//        a set of attributes that must be satisfied in order for the choice to 
+//        be available to the player. (i.e. popularity must be at least 50, or
+//        happiness must be at least 0.  if there is no minimum value, typically
+//        that is set to be a minimum of -999 or some other very small value). 
+//        if any req isn't met, then the choice won't be shown to the player
+//   mods
+//        a set of attributes that will be adjusted if the choice is taken
+//        by the player. the value for each mod will be added to the current
+//        attribute. (positive numbers increase the value, negative decrease, 
+//        0 means no change)
+//   sActionText
+//        this is the text that is shown to the player if they take the choice
+//   sNextNodeID
+//        if the choice is taken, then this NodeID becomes the new current 
+//        game node. It *can* be the same node as we started from.
+//   sMenuID
+//        this is purely internal -- it is used by the UI to tell us which
+//        choice the player chose
+//   sText
+//        this is the text that will be shown in the UI for the choice (so the
+//        player knows something about what the choice is.  e.g. "Sit down" or
+//        "Turn light on"
+// 
 // ================================================================================
 class GameNodeChoice
 {
@@ -17,7 +48,8 @@ class GameNodeChoice
   /*----------------------------------------------------------------------------
   	%%Function: GameNodeChoice
   	%%Qualified: GameNodeChoice.GameNodeChoice
-  	
+   
+    constructor for the GameNodeChoice
   ----------------------------------------------------------------------------*/
   GameNodeChoice(String sMenuTextIn, String sTextIn, IntDict reqsIn, IntDict modsIn, String sActionTextIn, String sNextNodeIDIn)
   {
@@ -32,6 +64,25 @@ class GameNodeChoice
 
 // ================================================================================
 //  G A M E  N O D E 
+// 
+// Each game node represents a single "state" in the game. Game play progresses
+// by moving from GameNode to GameNode. 
+// 
+// Each game node has:
+// 
+//   sNodeID
+//        an identifier that is used as both the key in the games hashmap of nodes
+//        as well as the way that choices identify which node to move to if the
+//        choice is take
+//   sEntryText
+//        this is shown in the game window when the player enters this game node
+//        (it will not be shown if they repeat the same node -- i.e. if they
+//         go to node "foo" while they are already in node "foo")
+//   sBodyText
+//        this is shown in the game window when the user is in this node.
+//   sPromptText
+//        this is shown in the game window before asking the user to make a choice
+// 
 // ================================================================================
 class GameNode
 {
@@ -52,15 +103,35 @@ class GameNode
 
 // ================================================================================
 //  G A M E 
+// 
+// The game is just a set of possible nodes, the current game node, and the
+// current set of attributes for the player. The player makes a choice from a set
+// of choices that the current node has, the mods are applied to the current
+// set of attributes, and the next node from the choice becomes the new current
+// node
 // ================================================================================
 class Game
 {
+  // the hashmap of game nodes (NodeID => GameNode)
   HashMap<String, GameNode> m_gameNodes;
+
+  // the current set of attributes. starts at all zeros.
   IntDict m_attrsCurrent;
-  boolean m_fReenter; // this is true if they are just coming back to the same room again (allows us to not print the "enter" text for the room)
+
+  // this is true if they are just coming back to the same room again (allows us to not print the "enter" text for the room)
+  boolean m_fReenter; 
   
+  // the current node
   String m_sCurrentNodeID;
   
+  /* G A M E */
+  /*----------------------------------------------------------------------------
+  	%%Function: Game
+  	%%Qualified: Game.Game
+   
+    constructor for the game, called when the object is created. implicitly
+    resets the game
+  ----------------------------------------------------------------------------*/
   Game()
   {
     m_gameNodes = new HashMap<String, GameNode>();
@@ -69,6 +140,14 @@ class Game
     ResetGame();
   }
 
+  /* R E S E T  G A M E */
+  /*----------------------------------------------------------------------------
+  	%%Function: ResetGame
+  	%%Qualified: Game.ResetGame
+   
+    reset the current game - sets the current node back to "Enter" and resets
+    the attributes to all zeros
+  ----------------------------------------------------------------------------*/
   void ResetGame()
   {
     m_sCurrentNodeID = "Enter";
@@ -159,7 +238,11 @@ class Game
   /*----------------------------------------------------------------------------
   	%%Function: ExecuteActionForMenuChoice
   	%%Qualified: Game.ExecuteActionForMenuChoice
-  	
+   
+    Apply the chosen menu choice to the game state and set the new current node
+   
+    This only takes care of game internal state -- it applies all the mods
+    for the given choice to the game state and sets the new current node
   ----------------------------------------------------------------------------*/
   void ExecuteActionForMenuChoice(String sMenuChoice)
   {
@@ -188,6 +271,13 @@ class Game
     m_sCurrentNodeID = choice.sNextNodeID;
   }
   
+  /* G E T  E N T R Y  T E X T */
+  /*----------------------------------------------------------------------------
+  	%%Function: GetEntryText
+  	%%Qualified: Game.GetEntryText
+   
+    This will return the Entry Text (for the UI) for the current node
+  ----------------------------------------------------------------------------*/
   String GetEntryText()
   {
     if (m_fReenter)
@@ -201,7 +291,8 @@ class Game
   /*----------------------------------------------------------------------------
   	%%Function: GetBodyText
   	%%Qualified: Game.GetBodyText
-  	
+   
+    This will return the Body Text (for the UI) for the current node
   ----------------------------------------------------------------------------*/
   String GetBodyText()
   {
@@ -213,7 +304,8 @@ class Game
   /*----------------------------------------------------------------------------
   	%%Function: GetPromptText
   	%%Qualified: Game.GetPromptText
-  	
+   
+    This will return the Prompt Text (for the UI) for the current node
   ----------------------------------------------------------------------------*/
   String GetPromptText()
   {
@@ -225,7 +317,11 @@ class Game
   /*----------------------------------------------------------------------------
   	%%Function: GetOptionsKeys
   	%%Qualified: Game.GetOptionsKeys
-  	
+   
+    The UI will call this to get the set of possible choices for the current
+    node.  Not all of these nodes are going to be possible for the player
+    to execute, so the UI will have to pay attention to the return value from
+    GetOptionTextFromOptionKey to be sure they should show the option)
   ----------------------------------------------------------------------------*/
   String[] GetOptionsKeys()
   {
@@ -244,7 +340,10 @@ class Game
   /*----------------------------------------------------------------------------
   	%%Function: GetOptionTextFromOptionKey
   	%%Qualified: Game.GetOptionTextFromOptionKey
-  	
+   
+    The UI will iterate over all the possible option keys (returned from
+    GetOptionsKeys) in order to know which choices to present to the player
+    in the UI
   ----------------------------------------------------------------------------*/
   String GetOptionTextFromOptionKey(String sMenuOption)
   {
@@ -272,7 +371,8 @@ class Game
   /*----------------------------------------------------------------------------
   	%%Function: PrintAttrsCurrent
   	%%Qualified: Game.PrintAttrsCurrent
-  	
+   
+    just dump the current player attributes to the console (for debugging)
   ----------------------------------------------------------------------------*/
   void PrintAttrsCurrent(String msg)
   {
@@ -283,6 +383,14 @@ class Game
     println();
   }
  
+  /* F  C H E C K  G A M E  N O D E */
+  /*----------------------------------------------------------------------------
+  	%%Function: FCheckGameNode
+  	%%Qualified: Game.FCheckGameNode
+   
+    this checks the given game node for consistency (to make sure that it
+    points at game node ID's that really exist)
+  ----------------------------------------------------------------------------*/
   boolean FCheckGameNode(GameNode node)
   {
     for (Map.Entry me : node.choices.entrySet())
@@ -304,6 +412,14 @@ class Game
     return true;
   }
   
+  /* C H E C K  G A M E  N O D E S */
+  /*----------------------------------------------------------------------------
+  	%%Function: CheckGameNodes
+  	%%Qualified: Game.CheckGameNodes
+   
+    Go through all the game nodes and make sure they are consistent. also, make
+    sure that all the game nodes we create are all reachable by some choice.
+  ----------------------------------------------------------------------------*/
   void CheckGameNodes()
   {
     boolean fGameOK = true; // assume OK
@@ -332,6 +448,13 @@ class Game
       println("Game FAILED to pass validation tests");
   }
 
+  /* R E A D  A D V E N T U R E  G A M E */
+  /*----------------------------------------------------------------------------
+  	%%Function: ReadAdventureGame
+  	%%Qualified: Game.ReadAdventureGame
+   
+    Read the given adventure game csv file into this game
+  ----------------------------------------------------------------------------*/
   void ReadAdventureGame(String sFile)
   {
     AdventureReader reader = new AdventureReader();
