@@ -75,6 +75,7 @@ class Game
     m_attrsCurrent.add("Roommate", 0);
     m_attrsCurrent.add("Happiness", 0);
     m_attrsCurrent.add("Popularity", 0);
+    m_attrsCurrent.add("Friend", 0);
   }
   
   /* C R E A T E  C H O I C E */
@@ -223,7 +224,10 @@ class Game
     if (sMenuChoice == null)
       return null;
   
-    return "action text";
+    GameNode node = m_gameNodes.get(m_sCurrentNodeID);
+    GameNodeChoice choice = node.choices.get(sMenuChoice);
+    
+    return choice.sActionText;
   }
   
   /* E X E C U T E  A C T I O N  F O R  M E N U  C H O I C E */
@@ -385,6 +389,8 @@ class Game
       fGameOK = FCheckGameNode(node) && fGameOK;
     }
 
+    m_gameNodes.get("Enter").fMarked = true;
+    
     for (Map.Entry me : m_gameNodes.entrySet())
     {
       GameNode node = (GameNode)me.getValue();
@@ -475,7 +481,11 @@ class Game
     String GetGameValueFromValues(String[] values, int i)
     {
       if (i < values.length)
-        return values[i];
+      {
+        String value = values[i];
+        
+        return value;
+      }
       return null;
     }
     

@@ -47,7 +47,7 @@ class StoryWindow
   
   StoryWindow()
   {
-  } //<>//
+  } //<>// //<>//
 
   void ResetWindowDimensions(float x, float y, float dx, float dy)
   {
@@ -69,7 +69,7 @@ class StoryWindow
     if (str == null)
       return;
       
-    m_story = append(m_story, str);
+    m_story = append(m_story, str.replaceAll("\\^","\n"));
   }
   
   /* F  I S  B R E A K  O P P O R T U N I T Y */

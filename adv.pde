@@ -9,11 +9,17 @@ void Move(String sMenuChoice)
   g_game.PrintAttrsCurrent("Before Move");
   // apply sMenuChoice from the UI to the game
   
+  g_story.StoryWindow().AddToStory("\n"); // add some space before our action text
+  
   g_story.StoryWindow().AddToStory(g_game.GetActionTextForMenuChoice(sMenuChoice));
   
   g_game.ExecuteActionForMenuChoice(sMenuChoice);
+  
+  g_story.StoryWindow().AddToStory("\n"); // add some space before entry text
   g_story.StoryWindow().AddToStory(g_game.GetEntryText());
+  g_story.StoryWindow().AddToStory("\n"); // add some space before body text
   g_story.StoryWindow().AddToStory(g_game.GetBodyText());
+  g_story.StoryWindow().AddToStory("\n"); // add some space before prompt
   g_story.StoryWindow().AddToStory(g_game.GetPromptText());
   
   // now construct the controls
@@ -35,6 +41,7 @@ void setup() //<>// //<>//
   size(640,680); //<>// //<>//
 //  frameRate(5);
   g_story = new Story(640, 680);
+  g_story.StoryWindow().AddToStory("Game shell version 0.1\n");
   g_game = new Game();
 //  g_game.ReadGameNodes();
   g_game.ReadAdventureGame("c:\\temp\\adventure.csv");
